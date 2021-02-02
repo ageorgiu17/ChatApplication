@@ -1,5 +1,8 @@
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Date;
@@ -36,12 +39,17 @@ public class ServerWorker extends Thread{
     }
     
     private void handleClientSocket() throws IOException, InterruptedException {
-        OutputStream outputStream;
-        outputStream = clientSocket.getOutputStream();
-        for(int i = 0; i < 10; i ++){
-            
-            outputStream.write(("Time now is " + new Date() + "\n").getBytes());
-            Thread.sleep(1000);
+        InputStream inputStream = clientSocket.getInputStream();
+        OutputStream outputStream = clientSocket.getOutputStream();
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = reader.readLine()) != null){
+            if("quit".equalsIgnoreCase(line)){
+                break;
+            }
+            String msg = "You typed: " + line + "\n";
+            outputStream.write(msg.getBytes());
         }
         clientSocket.close();
     }    
