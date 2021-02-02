@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +25,11 @@ public class ServerWorker extends Thread{
 
     private final Socket clientSocket;
     private String login = null;
+    private final Server server;
+    private OutputStream outputStream;
 
-    ServerWorker(Socket clientSocket) {
+    ServerWorker(Server server, Socket clientSocket) {
+        this.server = server;
         this.clientSocket = clientSocket;
     }
     
@@ -42,7 +46,7 @@ public class ServerWorker extends Thread{
     
     private void handleClientSocket() throws IOException, InterruptedException {
         InputStream inputStream = clientSocket.getInputStream();
-        OutputStream outputStream = clientSocket.getOutputStream();
+       this.outputStream = clientSocket.getOutputStream();
         
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
@@ -63,6 +67,11 @@ public class ServerWorker extends Thread{
         }
         clientSocket.close();
     }    
+    
+    public String getLogin(){
+        return login;
+    }
+    
 
     private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException{
         if (tokens.length == 3){
@@ -74,10 +83,36 @@ public class ServerWorker extends Thread{
                 outputStream.write(msg.getBytes());
                 this.login = login;
                 System.out.println("User has succesfully loged in" + login);
+                
+                
+                List<ServerWorker> workerList = server.getWorkerList();
+                for(ServerWorker worker : workerList){
+                    if (worker.getLogin() != null){
+                        if (!login.equals(worker.getLogin())){
+                            String msg2 = "online" + worker.getLogin() + "\n";
+                            send(msg2);
+                        }
+                    }
+                   
+                }
+                
+                String onlineMsg = "online" + login + "\n"; 
+                
+                for(ServerWorker worker : workerList){
+                    if (!login.equals(worker.getLogin())){
+                        worker.send(onlineMsg);
+                    }
+                }
             } else {
                 String msg = "Error Login\n";
                 outputStream.write(msg.getBytes());
             }
+        }
+    }
+
+    private void send(String msg) throws IOException {
+        if (login != null){
+            outputStream.write(msg.getBytes());
         }
     }
 }
