@@ -45,5 +45,9 @@ public class Server extends Thread{
             e.printStackTrace();
         }
     }
+
+    void removeWorker(ServerWorker serverWorker) {
+       workerList.remove(serverWorker);
+    }
     
 }
