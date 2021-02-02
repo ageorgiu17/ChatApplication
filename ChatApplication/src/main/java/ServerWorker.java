@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ServerWorker extends Thread{
 
     private final Socket clientSocket;
+    private String login = null;
 
     ServerWorker(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -51,6 +52,8 @@ public class ServerWorker extends Thread{
                 String cmd = tokens[0];
                 if("quit".equalsIgnoreCase(cmd)){
                     break;
+                }else if("login".equalsIgnoreCase(cmd)){
+                    handleLogin(outputStream, tokens);
                 }else{
                     String msg = "Unknown " + line + "\n";
                     outputStream.write(msg.getBytes());
@@ -60,4 +63,21 @@ public class ServerWorker extends Thread{
         }
         clientSocket.close();
     }    
+
+    private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException{
+        if (tokens.length == 3){
+            String login = tokens[1];
+            String password = tokens[2];
+            
+            if ((login.equals("guest") && password.equals("guest")) || login.equals("user") && password.equals("user")){
+                String msg = "Login Succescful\n";
+                outputStream.write(msg.getBytes());
+                this.login = login;
+                System.out.println("User has succesfully loged in" + login);
+            } else {
+                String msg = "Error Login\n";
+                outputStream.write(msg.getBytes());
+            }
+        }
+    }
 }
