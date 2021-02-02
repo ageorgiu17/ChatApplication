@@ -54,7 +54,8 @@ public class ServerWorker extends Thread{
             String[] tokens = StringUtils.split(line);
             if(tokens != null && tokens.length > 0){ 
                 String cmd = tokens[0];
-                if("quit".equalsIgnoreCase(cmd)){
+                if("logoff".equalsIgnoreCase(cmd) || "quit".equalsIgnoreCase(cmd)){
+                    handleLogoff();
                     break;
                 }else if("login".equalsIgnoreCase(cmd)){
                     handleLogin(outputStream, tokens);
@@ -114,5 +115,17 @@ public class ServerWorker extends Thread{
         if (login != null){
             outputStream.write(msg.getBytes());
         }
+    }
+
+    private void handleLogoff() throws IOException {
+        List<ServerWorker> workerList = server.getWorkerList();
+        String onlineMsg = "offline" + login + "\n"; 
+                
+        for(ServerWorker worker : workerList){
+            if (!login.equals(worker.getLogin())){
+                worker.send(onlineMsg);
+                }
+            }
+        clientSocket.close();
     }
 }
