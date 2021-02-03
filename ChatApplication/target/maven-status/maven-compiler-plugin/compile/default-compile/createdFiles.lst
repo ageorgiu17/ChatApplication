@@ -1,6 +1,8 @@
 ServerWorker.class
 UserStatusListener.class
 ServerMain.class
+ChatClient$3.class
+MessageListener.class
 ChatClient$1.class
 ChatClient.class
 Server.class

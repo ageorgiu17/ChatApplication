@@ -27,6 +27,7 @@ public class ChatClient {
     private BufferedReader bufferIn;
     
     private ArrayList<UserStatusListener> userStatusListener = new ArrayList<>();
+    private ArrayList<MessageListener> messageListener = new ArrayList<>();
     
     public ChatClient(String serverName, int serverPort) {
         this.serverName = serverName;
@@ -46,6 +47,14 @@ public class ChatClient {
                 System.out.println("OFFLINE: " + login);
             }
     });
+        
+        client.addMessageListener(new MessageListener(){
+            @Override
+            public void onMessage(String fromLogin, String msgBody) {
+                System.out.println("You got a message from: "+ fromLogin + "==> " + msgBody);
+            }
+            
+        });
     
         if(!client.connect()){
             System.err.println("Connection failed!");
@@ -53,11 +62,13 @@ public class ChatClient {
             System.out.println("Connection succesfull!");
             if(client.login("guest", "guest")){
                 System.out.println("Login Succesful!");
+                
+                client.msg("Jim", "Hello");
             }else {
                 System.err.println("Error Login!");
             }
             
-            client.logoff();
+            //client.logoff();
             
         }
     }
@@ -122,6 +133,9 @@ public class ChatClient {
                         handleOnlineTokens(tokens);
                     }else if("offline".equalsIgnoreCase(cmd)){
                         handleOfflineTokens(tokens);
+                    }else if("msg".equalsIgnoreCase(cmd)){
+                        String[] tokensMsg = StringUtils.split(line, null, 3);
+                        handleMessage(tokensMsg);
                     }
                 }
             }
@@ -152,5 +166,27 @@ public class ChatClient {
     private void logoff() throws IOException {
         String cmd = "logoff!\n";
         serverOut.write(cmd.getBytes());
+    }
+
+    private void msg(String sendTo, String msgBody) throws IOException {
+       String cmd = "login <" + sendTo + ">: " + msgBody + "\n";
+       serverOut.write(cmd.getBytes());
+    }
+    
+    public void addMessageListener(MessageListener listener){
+        messageListener.add(listener);
+    }
+    
+    public void removeMessageListener(MessageListener listener){
+        messageListener.remove(listener);
+    }
+
+    private void handleMessage(String[] tokensMsg) {
+        String login = tokensMsg[1];
+        String msgBody = tokensMsg[2];
+        
+        for(MessageListener listener : messageListener){
+            listener.onMessage(login, msgBody);
+        }
     }
 }
