@@ -20,13 +20,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 public class ServerMain {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         int port = 8818;
         Server server = new Server(port);
         server.start();
-        
     }
-
-    
-    
 }
