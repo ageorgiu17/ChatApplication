@@ -1,10 +1,13 @@
-ServerWorker.class
 UserStatusListener.class
 ServerMain.class
-ChatClient$3.class
-MessageListener.class
 ChatClient$1.class
 ChatClient.class
+UserListPane$1.class
+MessagePane$1.class
+ServerWorker.class
+MessagePane.class
+ChatClient$3.class
+MessageListener.class
 Server.class
 ChatClient$2.class
 UserListPane.class
